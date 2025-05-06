@@ -8,6 +8,15 @@ class CourseController {
         res.render('courses/create')
     }
 
+    // [GET] /couses/edit/:id
+    edit(req, res, next) {
+        Course.findById(req.params.id)
+            .then(course => res.render('courses/edit', {
+                course: mongooseToObject(course)
+            }))
+            .catch(next)
+    }
+
     // [POST] /couses/store
     store(req, res, next) {
         const formData = req.body;
@@ -16,6 +25,13 @@ class CourseController {
         course.save()
             .then(() => res.redirect('/'))
             .catch(error => {})
+    }
+
+    // [PUT] /couses/:id
+    update(req, res, next) {
+        Course.updateOne({ _id: req.params.id }, req.body)
+            .then(() => res.redirect('/me/stored/courses'))
+            .catch(next)
     }
 
     // [GET] /couses/:slug
