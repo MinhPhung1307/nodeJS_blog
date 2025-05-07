@@ -1,22 +1,42 @@
-<div class="mt-4">
+<form class="mt-4" name="conttainer-form" method="POST" action="/courses/handle-form">
     <div>
       <h3>Khóa học của tôi</h3>
       <a href="/me/trash/courses">Thùng rác ({{coursesDelete}})</a>
+      <div class="mt-4 d-flex align-items-center">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="" id="checkbox-all">
+          <label class="form-check-label" for="checkbox-all" style="user-select: none;">
+            Chọn tất cả
+          </label>
+        </div>
+
+        <select class="form-control form-control-sm ml-4" name="action" required style="width: 180px; cursor: pointer">
+          <option value="">-- Chọn hành động --</option>
+          <option value="delete" class="checkbox-option">Xóa</option>
+        </select>
+        <button class="btn btn-primary btn-sm ml-4 disabled btn-excute">Thực hiện</button>
+      </div>
     </div>
 
     <table class="table mt-4">
         <thead>
             <tr>
+                <th></th>
                 <th scope="col">STT</th>
                 <th scope="col">Tên khóa học</th>
                 <th scope="col">Mô tả</th>
-                <th scope="col" min-width="125px">Thời gian tạo</th>
+                <th scope="col" style="min-width: 125px">Thời gian tạo</th>
                 <th scope="col" colspan="2">Chỉnh sửa</th>
             </tr>
         </thead>
         <tbody>
             {{#each courses}}
             <tr>
+                <td>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="courseIds[]" value="{{this._id}}">
+                  </div>
+                </td>
                 <th scope="row">{{sum @index 1}}</th>
                 <td>{{this.name}}</td>
                 <td>{{this.description}}</td>
@@ -39,7 +59,7 @@
             {{/each}}
         </tbody>
     </table>
-</div>
+</form>
 
 {{!-- confirm delete course --}}
 <div class="modal" id="delete-course-modal" tabindex="-1" role="dialog">
@@ -70,19 +90,52 @@
 
     document.addEventListener('DOMContentLoaded', function(){
 
-        var courseId;
-        var btnDelCourse = document.getElementById('btn-delete-course') 
-        var formDeleteCourse = document.forms['form-delete-course']
+      var courseId;
+      var btnDelCourse = document.getElementById('btn-delete-course') ;
+      var formDeleteCourse = document.forms['form-delete-course'];
+      var checkboxAll = $('#checkbox-all');
+      var courseCheckbox = $('input[name="courseIds[]"]');
+      var containerForm = document.forms['conttainer-form'];
 
-        $('#delete-course-modal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget) 
-            courseId = button.data('id') 
-        })
+      $('#delete-course-modal').on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget) 
+          courseId = button.data('id') 
+      })
 
-        btnDelCourse.onclick = function() {
-            formDeleteCourse.action = `/courses/${courseId}?_method=DELETE`;
-            formDeleteCourse.submit();
+      btnDelCourse.onclick = function() {
+          formDeleteCourse.action = `/courses/${courseId}?_method=DELETE`;
+          formDeleteCourse.submit();
+      }
+
+      // Click checkboxAll
+      checkboxAll.change(function() {
+        var isCheckedAll = $(this).prop('checked');
+        courseCheckbox.prop('checked', isCheckedAll);
+        CheckCheckbox()
+      })
+
+      // Click checkbox course
+      courseCheckbox.change(function() {
+        var isCheckedAll = courseCheckbox.length === $('input[name="courseIds[]"]:checked').length;
+        checkboxAll.prop('checked', isCheckedAll);
+        CheckCheckbox()
+      })
+
+      $('.btn-excute').on('submit', function(e) {
+        var isSubmit = !$(this).hasClass('disabled');
+        if (!isSubmit){
+          e.preventDefault();
         }
+      })
+
+      function CheckCheckbox(){
+        if($('input[name="courseIds[]"]:checked').length > 0){
+          $('.btn-excute').removeClass('disabled');
+        }else{
+          $('.btn-excute').addClass('disabled');
+        }
+      }
+
     })
     
 </script>
