@@ -77,6 +77,24 @@ class CourseController {
                 res.json({ message: 'Action invalid!' })
         }
     }
+    // [POST] /couses/handleTrashForm
+    handleTrashForm(req, res, next){
+        switch(req.body.action){
+            case 'restore': 
+                Course.restore({ _id: { $in: req.body.courseIds } })
+                    .then(() => {return Course.updateMany({ _id: { $in: req.body.courseIds } }, { deleted: false });})
+                    .then(() => res.redirect('back'))
+                    .catch(next)
+                break;
+            case 'forceDelete': 
+                Course.deleteMany({ _id: { $in: req.body.courseIds } })
+                    .then(() => res.redirect('back'))
+                    .catch(next)
+                break;
+            default:
+                res.json({ message: 'Action invalid!' })
+        }
+    }
     
 }
 
